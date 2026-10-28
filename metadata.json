@@ -1,0 +1,6 @@
+{
+  "name": "Digitalization in Healthcare",
+  "description": "Medical data science, ML laboratory, and clinical decision support platform featuring the Indian Liver Patient Dataset (ILPD), 3D liver anatomy, computer vision jaundice screening, curriculum, and clinical games.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

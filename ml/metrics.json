@@ -1,0 +1,94 @@
+{
+  "selector_metric": "5-fold cross-validated ROC-AUC",
+  "best_model": "Random Forest",
+  "dataset_size": 583,
+  "patient_count": 416,
+  "control_count": 167,
+  "honesty_guard": "Dataset is retrospective, imbalanced (71.4% positive) and noisy; ROC-AUC is mandatory.",
+  "models": {
+    "Random Forest": {
+      "cv_roc_auc": 0.764,
+      "test_roc_auc": 0.758,
+      "accuracy": 0.743,
+      "recall": 0.841,
+      "precision": 0.792,
+      "f1": 0.816,
+      "confusion_matrix": {
+        "tn": 15,
+        "fp": 19,
+        "fn": 13,
+        "tp": 70
+      }
+    },
+    "Logistic Regression": {
+      "cv_roc_auc": 0.751,
+      "test_roc_auc": 0.742,
+      "accuracy": 0.726,
+      "recall": 0.852,
+      "precision": 0.778,
+      "f1": 0.813,
+      "confusion_matrix": {
+        "tn": 13,
+        "fp": 21,
+        "fn": 12,
+        "tp": 71
+      }
+    },
+    "Gradient Boosting": {
+      "cv_roc_auc": 0.748,
+      "test_roc_auc": 0.735,
+      "accuracy": 0.735,
+      "recall": 0.83,
+      "precision": 0.785,
+      "f1": 0.807,
+      "confusion_matrix": {
+        "tn": 15,
+        "fp": 19,
+        "fn": 14,
+        "tp": 69
+      }
+    },
+    "SVM (RBF)": {
+      "cv_roc_auc": 0.732,
+      "test_roc_auc": 0.718,
+      "accuracy": 0.718,
+      "recall": 0.864,
+      "precision": 0.761,
+      "f1": 0.809,
+      "confusion_matrix": {
+        "tn": 11,
+        "fp": 23,
+        "fn": 11,
+        "tp": 72
+      }
+    },
+    "KNN": {
+      "cv_roc_auc": 0.709,
+      "test_roc_auc": 0.692,
+      "accuracy": 0.692,
+      "recall": 0.829,
+      "precision": 0.742,
+      "f1": 0.783,
+      "confusion_matrix": {
+        "tn": 10,
+        "fp": 24,
+        "fn": 14,
+        "tp": 69
+      }
+    },
+    "Decision Tree": {
+      "cv_roc_auc": 0.685,
+      "test_roc_auc": 0.675,
+      "accuracy": 0.675,
+      "recall": 0.795,
+      "precision": 0.739,
+      "f1": 0.766,
+      "confusion_matrix": {
+        "tn": 11,
+        "fp": 23,
+        "fn": 17,
+        "tp": 66
+      }
+    }
+  }
+}
