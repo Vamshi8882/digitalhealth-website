@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Users, Plus, Trash2, Share2, Search, Video, FileText, Headphones, ExternalLink, Tag, MessageSquare, BookOpen } from 'lucide-react';
+import { Users, Plus, Trash2, Share2, Search, Video, FileText, Headphones, ExternalLink, Tag, MessageSquare, BookOpen, Trophy } from 'lucide-react';
+import { GlobalClinicalLeaderboard } from './GlobalClinicalLeaderboard';
 
 export interface LearningResource {
   id: string;
@@ -12,8 +13,16 @@ export interface LearningResource {
   date: string;
 }
 
-export const CommunityHub: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'resources' | 'glossary' | 'discussions'>('resources');
+export interface CommunityHubProps {
+  initialTab?: 'leaderboard' | 'resources' | 'glossary' | 'discussions';
+  onNavigateToCases?: () => void;
+}
+
+export const CommunityHub: React.FC<CommunityHubProps> = ({
+  initialTab = 'leaderboard',
+  onNavigateToCases
+}) => {
+  const [activeTab, setActiveTab] = useState<'leaderboard' | 'resources' | 'glossary' | 'discussions'>(initialTab);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('All');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -155,27 +164,55 @@ export const CommunityHub: React.FC = () => {
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Users className="w-5 h-5 text-cyan-400" />
-            Medical Research Hub &amp; Curated Resource Library
+            {activeTab === 'leaderboard' ? (
+              <>
+                <Trophy className="w-5 h-5 text-amber-400" />
+                Global Clinical Leaderboard &amp; Academic Network
+              </>
+            ) : (
+              <>
+                <Users className="w-5 h-5 text-cyan-400" />
+                Medical Research Hub &amp; Curated Resource Library
+              </>
+            )}
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Collaborative repository for medical students, bioinformaticians, and data fellows to Add, Share, and Curate learning materials.
+            {activeTab === 'leaderboard'
+              ? 'Site-wide competitive leaderboard tracking the top 10 diagnosticians, hospital fellows, and medical students across verified clinical cases.'
+              : 'Collaborative repository for medical students, bioinformaticians, and data fellows to Add, Share, and Curate learning materials.'}
           </p>
         </div>
 
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-lg transition-all shrink-0 cursor-pointer"
-        >
-          <Plus className="w-4 h-4" /> Contribute Resource
-        </button>
+        {activeTab === 'resources' && (
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-lg transition-all shrink-0 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" /> Contribute Resource
+          </button>
+        )}
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-800 space-x-6 text-sm">
+      <div className="flex border-b border-slate-800 space-x-6 text-sm overflow-x-auto custom-scrollbar">
+        <button
+          onClick={() => setActiveTab('leaderboard')}
+          className={`pb-3 font-semibold transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+            activeTab === 'leaderboard'
+              ? 'text-cyan-400 border-b-2 border-cyan-400'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Trophy className="w-4 h-4 text-amber-400" />
+          <span>Global Clinical Leaderboard</span>
+          <span className="text-[10px] font-mono bg-amber-950/80 text-amber-300 border border-amber-800 px-1.5 py-0.2 rounded font-bold">
+            Top 10
+          </span>
+        </button>
+
         <button
           onClick={() => setActiveTab('resources')}
-          className={`pb-3 font-semibold transition-colors flex items-center gap-2 ${
+          className={`pb-3 font-semibold transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer ${
             activeTab === 'resources'
               ? 'text-cyan-400 border-b-2 border-cyan-400'
               : 'text-slate-400 hover:text-white'
@@ -186,7 +223,7 @@ export const CommunityHub: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('glossary')}
-          className={`pb-3 font-semibold transition-colors flex items-center gap-2 ${
+          className={`pb-3 font-semibold transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer ${
             activeTab === 'glossary'
               ? 'text-cyan-400 border-b-2 border-cyan-400'
               : 'text-slate-400 hover:text-white'
@@ -197,7 +234,7 @@ export const CommunityHub: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('discussions')}
-          className={`pb-3 font-semibold transition-colors flex items-center gap-2 ${
+          className={`pb-3 font-semibold transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer ${
             activeTab === 'discussions'
               ? 'text-cyan-400 border-b-2 border-cyan-400'
               : 'text-slate-400 hover:text-white'
@@ -207,37 +244,44 @@ export const CommunityHub: React.FC = () => {
         </button>
       </div>
 
-      {/* Search & Tag Filter Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            placeholder="Search keywords, markers, authors..."
-            className="w-full bg-slate-950 text-xs text-white pl-9 pr-3 py-2 rounded-xl border border-slate-800 focus:outline-none focus:border-cyan-500"
-          />
-        </div>
+      {/* Global Leaderboard Tab */}
+      {activeTab === 'leaderboard' && (
+        <GlobalClinicalLeaderboard onNavigateToCases={onNavigateToCases} />
+      )}
 
-        {activeTab === 'resources' && (
-          <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
-            {['All', 'Hepatology', 'Machine Learning', 'Computer Vision', 'EHR Standards'].map(tag => (
-              <button
-                key={tag}
-                onClick={() => setSelectedTag(tag)}
-                className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-colors ${
-                  selectedTag === tag
-                    ? 'bg-cyan-500 text-slate-950 font-bold'
-                    : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
+      {/* Search & Tag Filter Bar (for Resources & Glossary) */}
+      {activeTab !== 'leaderboard' && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              placeholder="Search keywords, markers, authors..."
+              className="w-full bg-slate-950 text-xs text-white pl-9 pr-3 py-2 rounded-xl border border-slate-800 focus:outline-none focus:border-cyan-500"
+            />
           </div>
-        )}
-      </div>
+
+          {activeTab === 'resources' && (
+            <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
+              {['All', 'Hepatology', 'Machine Learning', 'Computer Vision', 'EHR Standards'].map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedTag(tag)}
+                  className={`px-2.5 py-1 text-xs rounded-lg font-medium transition-colors ${
+                    selectedTag === tag
+                      ? 'bg-cyan-500 text-slate-950 font-bold'
+                      : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Tab 1: Resources Cards */}
       {activeTab === 'resources' && (

@@ -4,7 +4,11 @@ import { predictLiverDiseaseRisk, PredictionResult } from '../ml/engine';
 import { AlertCircle, CheckCircle, HelpCircle, Activity, ArrowRight, RotateCcw, Download, Sparkles, Database, Clock } from 'lucide-react';
 import { useProgress } from '../context/ProgressContext';
 
-export const ClinicalPredictor: React.FC = () => {
+interface ClinicalPredictorProps {
+  onNavigateToIntelligence?: () => void;
+}
+
+export const ClinicalPredictor: React.FC<ClinicalPredictorProps> = ({ onNavigateToIntelligence }) => {
   const { savePredictionRecord, predictions, awardXP, storageEngine } = useProgress();
   const [formData, setFormData] = useState({
     age: 45,
@@ -126,6 +130,32 @@ export const ClinicalPredictor: React.FC = () => {
           This machine learning prediction model is designed strictly for medical student education and clinical decision-support research. Never make patient management, medication, or discharge decisions based solely on these algorithmic outputs.
         </div>
       </div>
+
+      {onNavigateToIntelligence && (
+        <div className="bg-gradient-to-r from-cyan-950/60 via-slate-900 to-indigo-950/60 border border-cyan-800/60 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-white flex items-center gap-2">
+                <span>Advanced AI Clinical Suite Available</span>
+                <span className="text-[10px] bg-cyan-500/20 text-cyan-300 font-mono px-2 py-0.5 rounded-full border border-cyan-500/30">15 New Capabilities</span>
+              </div>
+              <p className="text-[11px] text-slate-300 mt-0.5">
+                Multi-disease differential (Cirrhosis, Hepatitis, Fatty Liver), PDF OCR Lab Extractor, Ultrasound CNN feature maps, Voice Assistant, and Knowledge Graph.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onNavigateToIntelligence}
+            className="shrink-0 bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-md"
+          >
+            <span>Open AI Suite</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Preset Fill Buttons */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">

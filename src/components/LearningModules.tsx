@@ -1,7 +1,29 @@
-import React, { useState } from 'react';
-import { BookOpen, CheckCircle, ArrowRight, Award, HelpCircle, AlertCircle, ChevronDown, ChevronUp, Database, Save, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  BookOpen,
+  CheckCircle,
+  ArrowRight,
+  Award,
+  HelpCircle,
+  AlertCircle,
+  ChevronDown,
+  ChevronUp,
+  Database,
+  Save,
+  Check,
+  Search,
+  PlusCircle,
+  Trash2,
+  X,
+  Sparkles,
+  ShieldCheck,
+  Filter,
+  CheckCircle2,
+  GraduationCap
+} from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useProgress } from '../context/ProgressContext';
+import { useAuth } from '../context/AuthContext';
 
 export interface CurriculumModule {
   id: number;
@@ -9,6 +31,9 @@ export interface CurriculumModule {
   duration: string;
   category: 'Foundations' | 'Data & Features' | 'Machine Learning' | 'Clinical Deployment' | 'Ethics & Vision';
   summary: string;
+  isCertified?: boolean;
+  isCustom?: boolean;
+  createdBy?: string;
   sections: {
     heading: string;
     content: string;
@@ -28,6 +53,7 @@ export const MODULES_DATA: CurriculumModule[] = [
     title: 'Digital Transformation in Medicine: From Paper Charts to Clinical AI',
     duration: '25 min',
     category: 'Foundations',
+    isCertified: true,
     summary: 'Explore how digitized medical workflows, electronic health records (EHRs), and clinical analytics transform patient safety, clinical triage, and medical research.',
     sections: [
       {
@@ -57,6 +83,7 @@ export const MODULES_DATA: CurriculumModule[] = [
     title: 'Healthcare Data Architecture & EHR Standards (HL7, FHIR, DICOM)',
     duration: '30 min',
     category: 'Foundations',
+    isCertified: true,
     summary: 'Master the standards governing modern health informatics: Fast Healthcare Interoperability Resources (FHIR), HL7 v2 messaging, and DICOM imaging pipelines.',
     sections: [
       {
@@ -86,6 +113,7 @@ export const MODULES_DATA: CurriculumModule[] = [
     title: 'The Indian Liver Patient Dataset (ILPD): Hepatology Biomarkers Deep Dive',
     duration: '35 min',
     category: 'Data & Features',
+    isCertified: true,
     summary: 'A comprehensive biochemical exploration of the 583-patient ILPD cohort from Andhra Pradesh, India. Understand each serum marker and its physiological role.',
     sections: [
       {
@@ -115,6 +143,7 @@ export const MODULES_DATA: CurriculumModule[] = [
     title: 'Clinical Feature Engineering: De Ritis Ratio (AST/ALT) & Bilirubin Conjugation',
     duration: '30 min',
     category: 'Data & Features',
+    isCertified: true,
     summary: 'Discover how domain-guided mathematical combinations of raw features dramatically enhance model predictive power over naive raw inputs.',
     sections: [
       {
@@ -144,6 +173,7 @@ export const MODULES_DATA: CurriculumModule[] = [
     title: 'Supervised Machine Learning in Diagnostic Decision Support',
     duration: '40 min',
     category: 'Machine Learning',
+    isCertified: true,
     summary: 'Compare core supervised learning algorithms: Logistic Regression, Decision Trees, Random Forests, Support Vector Machines, and Gradient Boosting.',
     sections: [
       {
@@ -173,6 +203,7 @@ export const MODULES_DATA: CurriculumModule[] = [
     title: 'Model Evaluation in Medicine: ROC-AUC vs Accuracy & Asymmetric Costs',
     duration: '35 min',
     category: 'Machine Learning',
+    isCertified: true,
     summary: 'Learn why standard software engineering accuracy metrics fail in healthcare, and how to calibrate decision thresholds based on clinical cost matrices.',
     sections: [
       {
@@ -202,6 +233,7 @@ export const MODULES_DATA: CurriculumModule[] = [
     title: 'Explainable AI (XAI): SHAP, LIME, and Demystifying Black-Box Algorithms',
     duration: '30 min',
     category: 'Clinical Deployment',
+    isCertified: true,
     summary: 'Explore techniques to extract individual feature contributions: SHAP (Shapley Additive exPlanations), LIME, and logistic odds-ratio waterfalls.',
     sections: [
       {
@@ -231,6 +263,7 @@ export const MODULES_DATA: CurriculumModule[] = [
     title: 'Clinical Decision Support Systems (CDSS) & Workflow Integration',
     duration: '35 min',
     category: 'Clinical Deployment',
+    isCertified: true,
     summary: 'How to deploy machine learning within real-world hospital workflows: avoiding alert fatigue, ensuring five rights of CDSS, and managing model drift.',
     sections: [
       {
@@ -260,6 +293,7 @@ export const MODULES_DATA: CurriculumModule[] = [
     title: 'Medical Computer Vision: Color Spaces (HSV/LAB) for Scleral Icterus',
     duration: '35 min',
     category: 'Ethics & Vision',
+    isCertified: true,
     summary: 'Understand the optical physics and computer vision mathematics behind automated jaundice screening using HSV hue filtering and CIE LAB b* chrominance.',
     sections: [
       {
@@ -289,6 +323,7 @@ export const MODULES_DATA: CurriculumModule[] = [
     title: 'Medical AI Ethics, Algorithmic Bias & Regulatory Compliance (FDA/CE-IVD)',
     duration: '40 min',
     category: 'Ethics & Vision',
+    isCertified: true,
     summary: 'The ethical, legal, and safety standards governing Software as a Medical Device (SaMD): HIPAA privacy, demographic bias, and Good Machine Learning Practice (GMLP).',
     sections: [
       {
@@ -315,52 +350,197 @@ export const MODULES_DATA: CurriculumModule[] = [
   }
 ];
 
-export const LearningModules: React.FC = () => {
+const MODULES_STORAGE_KEY = 'dhp_curriculum_modules_v2';
+
+function getStoredModules(): CurriculumModule[] {
+  try {
+    const raw = localStorage.getItem(MODULES_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn('Error reading stored modules:', e);
+  }
+  return MODULES_DATA;
+}
+
+function saveStoredModules(mods: CurriculumModule[]): void {
+  try {
+    localStorage.setItem(MODULES_STORAGE_KEY, JSON.stringify(mods));
+  } catch (e) {
+    console.error('Error saving modules:', e);
+  }
+}
+
+interface LearningModulesProps {
+  initialModuleId?: number;
+}
+
+export const LearningModules: React.FC<LearningModulesProps> = ({ initialModuleId }) => {
   const {
     completedModules,
     markModuleComplete,
     quizAnswers,
     storageEngine
   } = useProgress();
+  const { currentUser, updateProfile } = useAuth();
 
-  const [selectedModule, setSelectedModule] = useState<CurriculumModule>(MODULES_DATA[0]);
+  const [modulesList, setModulesList] = useState<CurriculumModule[]>(getStoredModules);
+  const [selectedModule, setSelectedModule] = useState<CurriculumModule>(() => {
+    if (initialModuleId) {
+      const found = modulesList.find(m => m.id === initialModuleId);
+      if (found) return found;
+    }
+    return modulesList[0] || MODULES_DATA[0];
+  });
   const [showQuizResult, setShowQuizResult] = useState<Record<number, boolean>>({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  // New module state
+  const [newTitle, setNewTitle] = useState('');
+  const [newCategory, setNewCategory] = useState<CurriculumModule['category']>('Foundations');
+  const [newDuration, setNewDuration] = useState('30 min');
+  const [newSummary, setNewSummary] = useState('');
+  const [newHeading, setNewHeading] = useState('');
+  const [newContent, setNewContent] = useState('');
+  const [newPearl, setNewPearl] = useState('');
+  const [newQuestion, setNewQuestion] = useState('');
+  const [newOption0, setNewOption0] = useState('');
+  const [newOption1, setNewOption1] = useState('');
+  const [newOption2, setNewOption2] = useState('');
+  const [newOption3, setNewOption3] = useState('');
+  const [newCorrectIdx, setNewCorrectIdx] = useState(0);
+  const [newExplanation, setNewExplanation] = useState('');
+
+  useEffect(() => {
+    if (initialModuleId) {
+      const found = modulesList.find(m => m.id === initialModuleId);
+      if (found) setSelectedModule(found);
+    }
+  }, [initialModuleId, modulesList]);
 
   const handleSelectQuizOption = (moduleId: number, optionIdx: number) => {
     setShowQuizResult(prev => ({ ...prev, [moduleId]: true }));
     markModuleComplete(moduleId, optionIdx);
+
+    // Sync with auth profile completed modules
+    if (currentUser) {
+      const existing = currentUser.completedModulesList || [];
+      if (!existing.includes(moduleId)) {
+        updateProfile({
+          completedModulesList: [...existing, moduleId]
+        });
+      }
+    }
   };
 
-  const progressPercent = Math.round((completedModules.length / MODULES_DATA.length) * 100);
+  const handleAddModule = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle.trim() || !newSummary.trim()) {
+      alert('Please fill out the title and summary.');
+      return;
+    }
+
+    const nextId = Math.max(...modulesList.map(m => m.id), 0) + 1;
+    const created: CurriculumModule = {
+      id: nextId,
+      title: newTitle.trim(),
+      duration: newDuration.trim() || '25 min',
+      category: newCategory,
+      summary: newSummary.trim(),
+      isCertified: currentUser?.userType === 'faculty',
+      isCustom: true,
+      createdBy: currentUser ? `${currentUser.titlePrefix} ${currentUser.fullName}` : 'Faculty Member',
+      sections: [
+        {
+          heading: newHeading.trim() || 'Core Clinical Concepts',
+          content: newContent.trim() || 'Clinical knowledge and analytical principles for medical student training.',
+          clinicalPearl: newPearl.trim() || 'Always correlate laboratory values with bedside patient physical presentation.'
+        }
+      ],
+      quiz: {
+        question: newQuestion.trim() || 'What is the primary clinical objective of this module?',
+        options: [
+          newOption0.trim() || 'To standardize diagnostic reasoning',
+          newOption1.trim() || 'To replace biological pathology tests',
+          newOption2.trim() || 'To bypass clinical examination',
+          newOption3.trim() || 'None of the above'
+        ],
+        correctIndex: newCorrectIdx,
+        explanation: newExplanation.trim() || 'Medical curriculum modules are constructed to instill disciplined diagnostic methodology.'
+      }
+    };
+
+    const updated = [...modulesList, created];
+    setModulesList(updated);
+    saveStoredModules(updated);
+    setSelectedModule(created);
+    setShowAddModal(false);
+    confetti({ particleCount: 50, spread: 60 });
+  };
+
+  const handleDeleteModule = (moduleId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this custom curriculum resource?')) {
+      const updated = modulesList.filter(m => m.id !== moduleId);
+      setModulesList(updated);
+      saveStoredModules(updated);
+      if (selectedModule.id === moduleId) {
+        setSelectedModule(updated[0] || MODULES_DATA[0]);
+      }
+    }
+  };
+
+  const filteredModules = modulesList.filter(m => {
+    const matchesSearch =
+      m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.summary.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === 'All' || m.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const progressPercent = Math.round((completedModules.length / modulesList.length) * 100);
 
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full space-y-6 animate-in fade-in duration-200">
       {/* Curriculum Header & Progress */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-cyan-400" />
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+        <div className="space-y-2 max-w-2xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold">
+            <GraduationCap className="w-3.5 h-3.5" />
+            <span>Certified Medical AI & Hepatology Education</span>
+          </div>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-2.5">
+            <BookOpen className="w-6 h-6 text-cyan-400" />
             Medical Data Science &amp; Digitalization Curriculum
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            10 programmatic accredited modules designed for medical students, healthcare developers, and clinical AI researchers.
+          </h1>
+          <p className="text-xs text-slate-300 leading-relaxed">
+            Standardized accredited modules for MBBS students, internal medicine residents, and data scientists. Search certified curriculum resources, study domain pearls, and take mastery checks.
           </p>
         </div>
 
-        {/* Gamified Progress Bar & Storage Badge */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <div className="bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 text-[11px] text-slate-400 flex items-center gap-2">
-            <Database className="w-3.5 h-3.5 text-emerald-400" />
-            <span>State Saved: <strong className="text-slate-200">{storageEngine}</strong></span>
-          </div>
+        {/* Action Controls & Gamified Progress */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-4 py-2.5 rounded-2xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all"
+          >
+            <PlusCircle className="w-4 h-4" />
+            <span>Add Module Resource</span>
+          </button>
 
-          <div className="bg-slate-950 px-4 py-3 rounded-xl border border-slate-800 min-w-[220px]">
+          <div className="bg-slate-950/80 px-4 py-3 rounded-2xl border border-slate-800 min-w-[200px]">
             <div className="flex justify-between items-center text-xs mb-1.5">
               <span className="text-slate-400 font-medium flex items-center gap-1.5">
-                <Award className="w-4 h-4 text-amber-400" /> Curriculum Progress
+                <Award className="w-4 h-4 text-amber-400" /> Progress
               </span>
               <span className="font-mono font-bold text-white">
-                {completedModules.length} / {MODULES_DATA.length} ({progressPercent}%)
+                {completedModules.length} / {modulesList.length} ({progressPercent}%)
               </span>
             </div>
             <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
@@ -373,85 +553,153 @@ export const LearningModules: React.FC = () => {
         </div>
       </div>
 
+      {/* Filter and Search Bar */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between bg-slate-900/60 border border-slate-800/80 p-3 rounded-2xl">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search curriculum modules, topics, biomarkers..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-slate-950 border border-slate-800 text-white pl-10 pr-4 py-2 rounded-xl text-xs focus:outline-none focus:border-cyan-500"
+          />
+        </div>
+
+        <div className="flex items-center gap-2 overflow-x-auto text-xs">
+          <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1" />
+          {['All', 'Foundations', 'Data & Features', 'Machine Learning', 'Clinical Deployment', 'Ethics & Vision'].map(cat => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-3 py-1.5 rounded-xl transition-colors whitespace-nowrap ${
+                selectedCategory === cat
+                  ? 'bg-cyan-500 text-slate-950 font-bold shadow'
+                  : 'bg-slate-950 text-slate-300 hover:text-white border border-slate-800'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Main Layout: Left Module Index (4 cols) & Right Reader (8 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Module Sidebar */}
         <div className="lg:col-span-4 space-y-2">
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 px-1 mb-2">
-            Curriculum Sequence (10 Modules)
+          <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 px-1 mb-2 flex items-center justify-between">
+            <span>Modules ({filteredModules.length})</span>
+            <span className="text-[10px] text-cyan-400 font-mono">Select to Read</span>
           </div>
-          <div className="space-y-1.5 max-h-[680px] overflow-y-auto pr-1">
-            {MODULES_DATA.map(mod => {
+          <div className="space-y-2 max-h-[720px] overflow-y-auto pr-1">
+            {filteredModules.map(mod => {
               const isSelected = selectedModule.id === mod.id;
               const isCompleted = completedModules.includes(mod.id);
 
               return (
-                <button
+                <div
                   key={mod.id}
                   onClick={() => setSelectedModule(mod)}
-                  className={`w-full text-left p-3 rounded-xl border transition-all flex items-start gap-3 cursor-pointer ${
+                  className={`w-full text-left p-3.5 rounded-2xl border transition-all flex items-start justify-between gap-3 cursor-pointer group ${
                     isSelected
-                      ? 'bg-slate-800 border-cyan-500/60 shadow-md'
+                      ? 'bg-slate-800 border-cyan-500/70 shadow-md'
                       : 'bg-slate-900 border-slate-800 hover:border-slate-700 hover:bg-slate-800/50'
                   }`}
                 >
-                  <div className="mt-0.5 shrink-0">
-                    {isCompleted ? (
-                      <CheckCircle className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <span className="w-4 h-4 rounded-full border border-slate-600 flex items-center justify-center text-[10px] text-slate-400 font-mono">
-                        {mod.id}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between text-[10px] text-slate-400 mb-0.5">
-                      <span className="text-cyan-400 font-medium">{mod.category}</span>
-                      <span>{mod.duration}</span>
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="mt-0.5 shrink-0">
+                      {isCompleted ? (
+                        <CheckCircle className="w-4 h-4 text-emerald-400" />
+                      ) : (
+                        <span className="w-5 h-5 rounded-full border border-slate-600 flex items-center justify-center text-[10px] text-slate-400 font-mono">
+                          {mod.id}
+                        </span>
+                      )}
                     </div>
-                    <div className={`text-xs font-bold truncate ${isSelected ? 'text-white' : 'text-slate-300'}`}>
-                      {mod.title}
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-slate-950 text-slate-300 border border-slate-800">
+                          {mod.category}
+                        </span>
+                        {mod.isCertified ? (
+                          <span className="text-[9px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                            <CheckCircle2 className="w-2.5 h-2.5" /> Certified
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-bold text-purple-400 bg-purple-950/60 border border-purple-800/40 px-1.5 py-0.5 rounded">
+                            Contributed
+                          </span>
+                        )}
+                        <span className="text-[10px] text-slate-400 font-mono">{mod.duration}</span>
+                      </div>
+                      <h4 className="text-xs font-bold text-white group-hover:text-cyan-400 transition-colors line-clamp-2">
+                        {mod.title}
+                      </h4>
                     </div>
                   </div>
-                </button>
+
+                  {mod.isCustom && (
+                    <button
+                      onClick={(e) => handleDeleteModule(mod.id, e)}
+                      className="text-slate-500 hover:text-rose-400 p-1 rounded-lg shrink-0"
+                      title="Delete custom module"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
               );
             })}
           </div>
         </div>
 
-        {/* Module Content Reader */}
-        <div className="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-          {/* Module Title Header */}
-          <div className="border-b border-slate-800 pb-4">
-            <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5">
-              <span className="text-cyan-400 font-semibold uppercase tracking-wider font-mono">
-                Module {selectedModule.id} &bull; {selectedModule.category}
+        {/* Reader Pane */}
+        <div className="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+          {/* Module Title Banner */}
+          <div className="border-b border-slate-800 pb-5 space-y-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-800/40">
+                Module {selectedModule.id} • {selectedModule.category}
               </span>
-              <span>Estimated Reading: {selectedModule.duration}</span>
+              <span className="text-xs text-slate-400 font-mono">
+                Duration: {selectedModule.duration}
+              </span>
+              {selectedModule.isCertified ? (
+                <span className="text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5" /> Medical Board Accredited
+                </span>
+              ) : (
+                <span className="text-xs font-bold text-purple-400 bg-purple-950/60 border border-purple-800/40 px-2 py-0.5 rounded-lg">
+                  Author: {selectedModule.createdBy || 'Faculty Contributed'}
+                </span>
+              )}
             </div>
-            <h1 className="text-xl font-bold text-white">{selectedModule.title}</h1>
-            <p className="text-xs text-slate-300 mt-2 leading-relaxed bg-slate-950 p-3 rounded-xl border border-slate-800/80">
+            <h2 className="text-xl sm:text-2xl font-bold text-white leading-tight">
+              {selectedModule.title}
+            </h2>
+            <p className="text-xs text-slate-300 leading-relaxed bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
               {selectedModule.summary}
             </p>
           </div>
 
-          {/* Core Content Sections */}
+          {/* Module Sections */}
           <div className="space-y-6">
             {selectedModule.sections.map((sec, idx) => (
-              <div key={idx} className="space-y-2">
+              <div key={idx} className="space-y-2.5">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                  {sec.heading}
+                  <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                  <span>{sec.heading}</span>
                 </h3>
-                <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line pl-3 border-l-2 border-slate-800">
+                <div className="text-xs text-slate-300 leading-relaxed whitespace-pre-line pl-4 border-l border-slate-800">
                   {sec.content}
-                </p>
+                </div>
                 {sec.clinicalPearl && (
-                  <div className="mt-3 bg-cyan-950/40 border border-cyan-800/50 rounded-xl p-3 text-xs text-cyan-200 flex items-start gap-2.5">
-                    <Award className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                  <div className="ml-4 mt-3 bg-amber-950/30 border border-amber-800/40 rounded-2xl p-4 text-xs text-amber-200/90 flex items-start gap-2.5">
+                    <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                     <div>
-                      <span className="font-bold text-cyan-100">Clinical Pearl: </span>
-                      {sec.clinicalPearl}
+                      <strong className="text-amber-300 block mb-0.5">Clinical Pearl:</strong>
+                      <span>{sec.clinicalPearl}</span>
                     </div>
                   </div>
                 )}
@@ -459,8 +707,8 @@ export const LearningModules: React.FC = () => {
             ))}
           </div>
 
-          {/* Interactive Check-Point Quiz */}
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-4">
+          {/* Interactive Quiz / Mastery Check */}
+          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-white flex items-center gap-2">
                 <HelpCircle className="w-4 h-4 text-amber-400" />
@@ -494,7 +742,7 @@ export const LearningModules: React.FC = () => {
                   <button
                     key={optIdx}
                     onClick={() => handleSelectQuizOption(selectedModule.id, optIdx)}
-                    className={`w-full text-left p-3 rounded-xl border text-xs transition-all flex items-center justify-between ${btnStyle}`}
+                    className={`w-full text-left p-3 rounded-xl border text-xs transition-all flex items-center justify-between cursor-pointer ${btnStyle}`}
                   >
                     <span>{opt}</span>
                     {isSubmitted && isCorrectOption && (
@@ -506,7 +754,7 @@ export const LearningModules: React.FC = () => {
             </div>
 
             {showQuizResult[selectedModule.id] && (
-              <div className="bg-slate-900 p-3 rounded-lg border border-slate-800 text-xs text-slate-300 leading-relaxed">
+              <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 text-xs text-slate-300 leading-relaxed">
                 <span className="font-semibold text-white">Explanation: </span>
                 {selectedModule.quiz.explanation}
               </div>
@@ -517,7 +765,7 @@ export const LearningModules: React.FC = () => {
           <div className="flex items-center justify-between pt-4 border-t border-slate-800">
             <button
               onClick={() => markModuleComplete(selectedModule.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
                 completedModules.includes(selectedModule.id)
                   ? 'bg-emerald-600/20 text-emerald-300 border border-emerald-500/30'
                   : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-md'
@@ -527,10 +775,13 @@ export const LearningModules: React.FC = () => {
               {completedModules.includes(selectedModule.id) ? 'Completed (+100 XP)' : 'Mark Module Complete'}
             </button>
 
-            {selectedModule.id < MODULES_DATA.length && (
+            {selectedModule.id < modulesList.length && (
               <button
-                onClick={() => setSelectedModule(MODULES_DATA[selectedModule.id])}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white flex items-center gap-1.5 transition-colors"
+                onClick={() => {
+                  const nextMod = modulesList.find(m => m.id === selectedModule.id + 1) || modulesList[0];
+                  setSelectedModule(nextMod);
+                }}
+                className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <span>Next Module</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -539,6 +790,172 @@ export const LearningModules: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* ADD CURRICULUM MODULE MODAL */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-150">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl space-y-6 my-auto max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <PlusCircle className="w-5 h-5 text-cyan-400" />
+                  <span>Add Curriculum Resource / Module</span>
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Expand the learning syllabus with certified concepts or faculty topics.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-slate-400 hover:text-white p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddModule} className="space-y-4 text-xs">
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-300">Module Title</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Transient Elastography vs Biopsy in Staging Hepatic Fibrosis"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-300">Category</label>
+                  <select
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value as any)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
+                  >
+                    <option value="Foundations">Foundations</option>
+                    <option value="Data & Features">Data & Features</option>
+                    <option value="Machine Learning">Machine Learning</option>
+                    <option value="Clinical Deployment">Clinical Deployment</option>
+                    <option value="Ethics & Vision">Ethics & Vision</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-300">Estimated Duration</label>
+                  <input
+                    type="text"
+                    value={newDuration}
+                    onChange={(e) => setNewDuration(e.target.value)}
+                    placeholder="e.g. 30 min"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-300">Curriculum Summary</label>
+                <textarea
+                  rows={2}
+                  required
+                  placeholder="High-level overview of core learning outcomes..."
+                  value={newSummary}
+                  onChange={(e) => setNewSummary(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white resize-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-300">Section 1 Heading & Content</label>
+                <input
+                  type="text"
+                  placeholder="Heading..."
+                  value={newHeading}
+                  onChange={(e) => setNewHeading(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white mb-2"
+                />
+                <textarea
+                  rows={4}
+                  placeholder="Detailed clinical instructional content..."
+                  value={newContent}
+                  onChange={(e) => setNewContent(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white resize-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-amber-300">Clinical Pearl (Key Takeaway)</label>
+                <input
+                  type="text"
+                  placeholder="Essential diagnostic or prognostic pearl..."
+                  value={newPearl}
+                  onChange={(e) => setNewPearl(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
+                />
+              </div>
+
+              <div className="space-y-2 pt-2 border-t border-slate-800">
+                <label className="font-semibold text-cyan-400 block">Interactive Mastery Quiz</label>
+                <input
+                  type="text"
+                  placeholder="Quiz question..."
+                  value={newQuestion}
+                  onChange={(e) => setNewQuestion(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-white"
+                />
+
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <input
+                    type="text"
+                    placeholder="Option 1 (Default Correct)"
+                    value={newOption0}
+                    onChange={(e) => setNewOption0(e.target.value)}
+                    className="bg-slate-950 border border-slate-800 rounded-xl p-2 text-white"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Option 2"
+                    value={newOption1}
+                    onChange={(e) => setNewOption1(e.target.value)}
+                    className="bg-slate-950 border border-slate-800 rounded-xl p-2 text-white"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Option 3"
+                    value={newOption2}
+                    onChange={(e) => setNewOption2(e.target.value)}
+                    className="bg-slate-950 border border-slate-800 rounded-xl p-2 text-white"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Option 4"
+                    value={newOption3}
+                    onChange={(e) => setNewOption3(e.target.value)}
+                    className="bg-slate-950 border border-slate-800 rounded-xl p-2 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-5 py-2 rounded-xl"
+                >
+                  Publish Module
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

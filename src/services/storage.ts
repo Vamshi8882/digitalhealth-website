@@ -82,7 +82,31 @@ export interface UserProgressState {
   // Prediction History
   predictions: SavedPrediction[];
 
+  // Clinical Morning Report & 30-Day Activity Streak
+  morningReportLastCompletedDate?: string; // YYYY-MM-DD
+  morningReportAnswers?: Record<
+    string,
+    {
+      questionId: string;
+      selectedOption: number;
+      isCorrect: boolean;
+      xpAwarded: number;
+      timestamp: string;
+    }
+  >;
+  streakHistory?: Record<string, DailyStreakRecord>;
+
   lastSavedTimestamp: number;
+}
+
+export interface DailyStreakRecord {
+  date: string; // YYYY-MM-DD
+  dayLabel: string; // e.g. "Oct 28"
+  shortDay: string; // e.g. "28"
+  dayOfWeek: string; // e.g. "Tue"
+  loggedIn: boolean;
+  quizCompleted: boolean;
+  xpEarned: number;
 }
 
 const DB_NAME = 'DigitalHealthDB';

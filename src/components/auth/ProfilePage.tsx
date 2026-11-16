@@ -77,16 +77,22 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
   // Open Edit Modal
   const handleOpenEdit = () => {
     setEditFormData({
+      username: currentUser.username || '',
+      email: currentUser.email || '',
       fullName: currentUser.fullName,
       titlePrefix: currentUser.titlePrefix,
       role: currentUser.role,
+      userType: currentUser.userType || 'student',
       institution: currentUser.institution,
       department: currentUser.department,
       medicalRegistrationId: currentUser.medicalRegistrationId,
       specialization: currentUser.specialization,
       bio: currentUser.bio,
       phone: currentUser.phone || '',
-      location: currentUser.location || '',
+      country: currentUser.country || 'India',
+      state: currentUser.state || 'Delhi',
+      areaAddress: currentUser.areaAddress || '',
+      location: currentUser.location || `${currentUser.state || 'Delhi'}, ${currentUser.country || 'India'}`,
       avatarUrl: currentUser.avatarUrl
     });
     setEditAvatarPreview(currentUser.avatarUrl);
@@ -203,8 +209,18 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800">
                   {currentUser.role}
                 </span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                  currentUser.userType === 'faculty'
+                    ? 'text-purple-300 bg-purple-950 border-purple-800'
+                    : 'text-emerald-300 bg-emerald-950 border-emerald-800'
+                }`}>
+                  {currentUser.userType === 'faculty' ? 'Faculty & Specialist' : 'Medical Student'}
+                </span>
                 <span className="text-[10px] font-mono text-indigo-300 bg-indigo-950 px-2 py-0.5 rounded border border-indigo-800">
                   {rank}
+                </span>
+                <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                  @{currentUser.username || 'clinician'}
                 </span>
               </div>
 
@@ -226,11 +242,15 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               {currentUser.bio}
             </p>
 
-            {/* Quick Contact & Credentials Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-400 pt-1">
+            {/* Quick Contact & Credentials Grid with Full Address & Phone */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs text-slate-400 pt-1">
               <div className="flex items-center gap-2 justify-center md:justify-start">
                 <Mail className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                <span className="truncate">{currentUser.email}</span>
+                <span className="truncate" title={currentUser.email}>{currentUser.email}</span>
+              </div>
+              <div className="flex items-center gap-2 justify-center md:justify-start">
+                <Phone className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                <span>{currentUser.phone || '+91 98765 43210'}</span>
               </div>
               <div className="flex items-center gap-2 justify-center md:justify-start">
                 <FileBadge className="w-3.5 h-3.5 text-slate-500 shrink-0" />
@@ -238,7 +258,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
               </div>
               <div className="flex items-center gap-2 justify-center md:justify-start">
                 <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                <span>{currentUser.location || 'India'}</span>
+                <span className="truncate" title={`${currentUser.areaAddress || ''}, ${currentUser.state || ''}, ${currentUser.country || 'India'}`}>
+                  {currentUser.areaAddress ? `${currentUser.areaAddress}, ${currentUser.state}` : (currentUser.location || 'India')}
+                </span>
               </div>
             </div>
           </div>
@@ -538,6 +560,41 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
 
               {/* Form Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 text-xs">
+                <div className="sm:col-span-4 space-y-1">
+                  <label className="font-semibold text-slate-300">Username (@)</label>
+                  <input
+                    type="text"
+                    value={editFormData.username || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, username: e.target.value })}
+                    required
+                    placeholder="e.g. dr_vamshi_aiims"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-mono"
+                  />
+                </div>
+
+                <div className="sm:col-span-4 space-y-1">
+                  <label className="font-semibold text-slate-300">Account Type</label>
+                  <select
+                    value={editFormData.userType || 'student'}
+                    onChange={(e) => setEditFormData({ ...editFormData, userType: e.target.value as any })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
+                  >
+                    <option value="student">Medical Student</option>
+                    <option value="faculty">Faculty &amp; Specialist</option>
+                  </select>
+                </div>
+
+                <div className="sm:col-span-4 space-y-1">
+                  <label className="font-semibold text-slate-300">Email Address</label>
+                  <input
+                    type="email"
+                    value={editFormData.email || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                    required
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
+                  />
+                </div>
+
                 <div className="sm:col-span-3 space-y-1">
                   <label className="font-semibold text-slate-300">Prefix</label>
                   <select
@@ -581,7 +638,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 </div>
 
                 <div className="sm:col-span-6 space-y-1">
-                  <label className="font-semibold text-slate-300">Registration ID</label>
+                  <label className="font-semibold text-slate-300">Registration ID (NMC / Council / Roll)</label>
                   <input
                     type="text"
                     value={editFormData.medicalRegistrationId || ''}
@@ -611,21 +668,43 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({
                 </div>
 
                 <div className="sm:col-span-6 space-y-1">
-                  <label className="font-semibold text-slate-300">Phone</label>
+                  <label className="font-semibold text-slate-300">Phone Number</label>
                   <input
                     type="text"
                     value={editFormData.phone || ''}
                     onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+                    placeholder="+91 98765 43210"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
                   />
                 </div>
 
-                <div className="sm:col-span-6 space-y-1">
-                  <label className="font-semibold text-slate-300">Location</label>
+                <div className="sm:col-span-3 space-y-1">
+                  <label className="font-semibold text-slate-300">Country</label>
                   <input
                     type="text"
-                    value={editFormData.location || ''}
-                    onChange={(e) => setEditFormData({ ...editFormData, location: e.target.value })}
+                    value={editFormData.country || 'India'}
+                    onChange={(e) => setEditFormData({ ...editFormData, country: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
+                  />
+                </div>
+
+                <div className="sm:col-span-3 space-y-1">
+                  <label className="font-semibold text-slate-300">State / Province</label>
+                  <input
+                    type="text"
+                    value={editFormData.state || 'Delhi'}
+                    onChange={(e) => setEditFormData({ ...editFormData, state: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
+                  />
+                </div>
+
+                <div className="sm:col-span-12 space-y-1">
+                  <label className="font-semibold text-slate-300">Area Address</label>
+                  <input
+                    type="text"
+                    value={editFormData.areaAddress || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, areaAddress: e.target.value })}
+                    placeholder="e.g. Ring Road, Ansari Nagar East, Faculty Enclave"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white"
                   />
                 </div>

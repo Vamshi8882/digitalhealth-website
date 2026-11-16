@@ -1,1 +1,581 @@
 @import "tailwindcss";
+
+/* -------------------------------------------------------------
+ * Digitalization in Healthcare - Universal Clinical Theme System
+ * High-Contrast Dark Mode & Clinical White Office Mode
+ * Compliant with WCAG 2.1 AA / AAA Contrast Guidelines
+ * ----------------------------------------------------------- */
+
+/* -------------------------------------------------------------
+ * 1. Global Micro-Typography & Readability Scale
+ * Ensures words, numbers, symbols, and clinical units are
+ * legible without eye-strain across BOTH dark and white themes.
+ * ----------------------------------------------------------- */
+
+/* Scale up previously microscopic text (9px, 10px, 11px) to accessible sizes */
+[class*="text-[9px]"],
+[class*="text-[10px]"] {
+  font-size: 0.75rem !important; /* 12px minimum */
+  line-height: 1.15rem !important;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+[class*="text-[11px]"] {
+  font-size: 0.8125rem !important; /* 13px */
+  line-height: 1.25rem !important;
+  font-weight: 500;
+}
+
+.text-xs {
+  font-size: 0.8125rem !important; /* 13px */
+  line-height: 1.25rem !important;
+}
+
+/* Maintain bold & semibold weights on micro-typography */
+[class*="text-[9px]"].font-bold,
+[class*="text-[10px]"].font-bold,
+[class*="text-[11px]"].font-bold,
+[class*="text-[9px]"] .font-bold,
+[class*="text-[10px]"] .font-bold,
+[class*="text-[11px]"] .font-bold,
+.text-xs.font-bold,
+.text-xs .font-bold {
+  font-weight: 700 !important;
+}
+
+[class*="text-[9px]"].font-semibold,
+[class*="text-[10px]"].font-semibold,
+[class*="text-[11px]"].font-semibold,
+[class*="text-[9px]"] .font-semibold,
+[class*="text-[10px]"] .font-semibold,
+[class*="text-[11px]"] .font-semibold,
+.text-xs.font-semibold,
+.text-xs .font-semibold {
+  font-weight: 600 !important;
+}
+
+/* Ensure mono labels, lab biomarker values, and formula symbols are clear */
+code,
+kbd,
+samp,
+pre,
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  letter-spacing: -0.01em;
+}
+
+/* -------------------------------------------------------------
+ * 2. High-Contrast Dark Theme Optimizations
+ * ----------------------------------------------------------- */
+html.dark,
+html[data-theme="dark"],
+body.dark {
+  background-color: #020617;
+  color: #f8fafc;
+}
+
+html.dark ::selection,
+html[data-theme="dark"] ::selection {
+  background-color: #06b6d4;
+  color: #020617;
+}
+
+/* Ensure secondary text in dark mode doesn't fade into the background */
+html.dark [class*="text-slate-300"],
+html[data-theme="dark"] [class*="text-slate-300"] {
+  color: #e2e8f0 !important;
+}
+
+html.dark [class*="text-slate-400"],
+html[data-theme="dark"] [class*="text-slate-400"] {
+  color: #cbd5e1 !important;
+}
+
+html.dark [class*="text-slate-500"],
+html[data-theme="dark"] [class*="text-slate-500"] {
+  color: #94a3b8 !important;
+}
+
+/* -------------------------------------------------------------
+ * 3. Clinical White (Light Theme) System
+ * Pristine hospital/laboratory white aesthetic with high-contrast
+ * text, clear symbols, vibrant clinical status badges, and sharp cards.
+ * ----------------------------------------------------------- */
+html.light,
+html[data-theme="light"],
+body.light {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html.light ::selection,
+html[data-theme="light"] ::selection {
+  background-color: #0284c7;
+  color: #ffffff;
+}
+
+/* 3.1 Surfaces & Card Backgrounds */
+html.light [class*="bg-slate-950"],
+html[data-theme="light"] [class*="bg-slate-950"] {
+  background-color: #f8fafc !important;
+}
+
+html.light [class*="bg-slate-900"],
+html[data-theme="light"] [class*="bg-slate-900"] {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.07), 0 1px 2px -1px rgb(0 0 0 / 0.04) !important;
+}
+
+html.light [class*="bg-slate-850"],
+html[data-theme="light"] [class*="bg-slate-850"],
+html.light [class*="bg-slate-800"],
+html[data-theme="light"] [class*="bg-slate-800"] {
+  background-color: #f1f5f9 !important;
+}
+
+/* Hero card light gradient */
+html.light [class*="from-slate-900"],
+html[data-theme="light"] [class*="from-slate-900"] {
+  background-image: linear-gradient(135deg, #ffffff 0%, #f8fafc 60%, #f0f9ff 100%) !important;
+}
+
+/* Subtle light gradients */
+html.light [class*="from-cyan-950"],
+html[data-theme="light"] [class*="from-cyan-950"] {
+  background-image: linear-gradient(to right, #f0f9ff, #ffffff, #eef2ff) !important;
+}
+
+/* 3.2 Light Theme Borders */
+html.light [class*="border-slate-800"],
+html[data-theme="light"] [class*="border-slate-800"],
+html.light [class*="border-slate-700"],
+html[data-theme="light"] [class*="border-slate-700"] {
+  border-color: #e2e8f0 !important;
+}
+
+/* 3.3 Light Theme Text Hierarchy & Contrast */
+html.light h1,
+html.light h2,
+html.light h3,
+html.light h4,
+html.light h5,
+html.light h6,
+html[data-theme="light"] h1,
+html[data-theme="light"] h2,
+html[data-theme="light"] h3,
+html[data-theme="light"] h4,
+html[data-theme="light"] h5,
+html[data-theme="light"] h6 {
+  color: #0f172a !important;
+}
+
+/* Convert text-white on light cards to deep readable slate-900 */
+html.light [class*="text-white"]:not([class*="bg-cyan-500"]):not([class*="bg-blue-600"]):not([class*="bg-rose-600"]):not([class*="bg-emerald-600"]):not([class*="bg-indigo-600"]):not([class*="btn-primary"]),
+html[data-theme="light"] [class*="text-white"]:not([class*="bg-cyan-500"]):not([class*="bg-blue-600"]):not([class*="bg-rose-600"]):not([class*="bg-emerald-600"]):not([class*="bg-indigo-600"]):not([class*="btn-primary"]) {
+  color: #0f172a !important;
+}
+
+html.light [class*="text-slate-100"],
+html[data-theme="light"] [class*="text-slate-100"],
+html.light [class*="text-slate-200"],
+html[data-theme="light"] [class*="text-slate-200"] {
+  color: #0f172a !important;
+}
+
+html.light [class*="text-slate-300"],
+html[data-theme="light"] [class*="text-slate-300"] {
+  color: #1e293b !important;
+  font-weight: 500;
+}
+
+html.light [class*="text-slate-400"],
+html[data-theme="light"] [class*="text-slate-400"] {
+  color: #334155 !important; /* WCAG AAA high contrast (7.5:1) */
+  font-weight: 500;
+}
+
+html.light [class*="text-slate-500"],
+html[data-theme="light"] [class*="text-slate-500"],
+html.light [class*="text-slate-600"],
+html[data-theme="light"] [class*="text-slate-600"] {
+  color: #475569 !important;
+  font-weight: 500;
+}
+
+/* 3.4 Clinical Semantic Colors in Light Mode (Punchy & Deep) */
+
+/* Cyan & Sky - Medical Data Science & Primary Informational Markers */
+html.light [class*="text-cyan-400"],
+html[data-theme="light"] [class*="text-cyan-400"],
+html.light [class*="text-cyan-300"],
+html[data-theme="light"] [class*="text-cyan-300"],
+html.light [class*="text-cyan-200"],
+html[data-theme="light"] [class*="text-cyan-200"],
+html.light [class*="text-cyan-100"],
+html[data-theme="light"] [class*="text-cyan-100"],
+html.light [class*="text-sky-400"],
+html[data-theme="light"] [class*="text-sky-400"],
+html.light [class*="text-sky-300"],
+html[data-theme="light"] [class*="text-sky-300"] {
+  color: #0284c7 !important; /* sky-600 */
+}
+
+html.light [class*="bg-cyan-950"],
+html[data-theme="light"] [class*="bg-cyan-950"],
+html.light [class*="bg-sky-950"],
+html[data-theme="light"] [class*="bg-sky-950"] {
+  background-color: #f0f9ff !important;
+  border-color: #bae6fd !important;
+}
+
+html.light [class*="bg-cyan-500/20"],
+html[data-theme="light"] [class*="bg-cyan-500/20"],
+html.light [class*="bg-cyan-500/10"],
+html[data-theme="light"] [class*="bg-cyan-500/10"] {
+  background-color: #e0f2fe !important;
+  color: #0369a1 !important;
+  border-color: #7dd3fc !important;
+  font-weight: 600 !important;
+}
+
+html.light [class*="border-cyan-800"],
+html[data-theme="light"] [class*="border-cyan-800"],
+html.light [class*="border-cyan-700"],
+html[data-theme="light"] [class*="border-cyan-700"],
+html.light [class*="border-cyan-900"],
+html[data-theme="light"] [class*="border-cyan-900"] {
+  border-color: #bae6fd !important;
+}
+
+/* Emerald & Teal - Normal Ranges, Negative Screenings & Verified Case Solutions */
+html.light [class*="text-emerald-400"],
+html[data-theme="light"] [class*="text-emerald-400"],
+html.light [class*="text-emerald-300"],
+html[data-theme="light"] [class*="text-emerald-300"],
+html.light [class*="text-emerald-200"],
+html[data-theme="light"] [class*="text-emerald-200"],
+html.light [class*="text-emerald-100"],
+html[data-theme="light"] [class*="text-emerald-100"],
+html.light [class*="text-teal-400"],
+html[data-theme="light"] [class*="text-teal-400"],
+html.light [class*="text-teal-300"],
+html[data-theme="light"] [class*="text-teal-300"] {
+  color: #047857 !important; /* emerald-700 */
+}
+
+html.light [class*="bg-emerald-950"],
+html[data-theme="light"] [class*="bg-emerald-950"],
+html.light [class*="bg-teal-950"],
+html[data-theme="light"] [class*="bg-teal-950"] {
+  background-color: #f0fdf4 !important;
+  border-color: #bbf7d0 !important;
+}
+
+html.light [class*="bg-emerald-500/20"],
+html[data-theme="light"] [class*="bg-emerald-500/20"],
+html.light [class*="bg-emerald-500/10"],
+html[data-theme="light"] [class*="bg-emerald-500/10"] {
+  background-color: #dcfce7 !important;
+  color: #047857 !important;
+  border-color: #86efac !important;
+  font-weight: 600 !important;
+}
+
+html.light [class*="border-emerald-800"],
+html[data-theme="light"] [class*="border-emerald-800"],
+html.light [class*="border-emerald-700"],
+html[data-theme="light"] [class*="border-emerald-700"] {
+  border-color: #bbf7d0 !important;
+}
+
+/* Rose & Red - High Risk, Abnormal / Elevated Biomarkers & Acute Diagnoses */
+html.light [class*="text-rose-400"],
+html[data-theme="light"] [class*="text-rose-400"],
+html.light [class*="text-rose-300"],
+html[data-theme="light"] [class*="text-rose-300"],
+html.light [class*="text-rose-200"],
+html[data-theme="light"] [class*="text-rose-200"],
+html.light [class*="text-rose-100"],
+html[data-theme="light"] [class*="text-rose-100"],
+html.light [class*="text-red-400"],
+html[data-theme="light"] [class*="text-red-400"],
+html.light [class*="text-red-300"],
+html[data-theme="light"] [class*="text-red-300"],
+html.light [class*="text-red-200"],
+html[data-theme="light"] [class*="text-red-200"] {
+  color: #b91c1c !important; /* red-700 */
+}
+
+html.light [class*="bg-rose-950"],
+html[data-theme="light"] [class*="bg-rose-950"],
+html.light [class*="bg-red-950"],
+html[data-theme="light"] [class*="bg-red-950"] {
+  background-color: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+}
+
+html.light [class*="bg-rose-500/20"],
+html[data-theme="light"] [class*="bg-rose-500/20"],
+html.light [class*="bg-rose-500/10"],
+html[data-theme="light"] [class*="bg-rose-500/10"],
+html.light [class*="bg-red-500/20"],
+html[data-theme="light"] [class*="bg-red-500/20"] {
+  background-color: #fee2e2 !important;
+  color: #b91c1c !important;
+  border-color: #fca5a5 !important;
+  font-weight: 600 !important;
+}
+
+html.light [class*="border-rose-800"],
+html[data-theme="light"] [class*="border-rose-800"],
+html.light [class*="border-rose-700"],
+html[data-theme="light"] [class*="border-rose-700"],
+html.light [class*="border-rose-600"],
+html[data-theme="light"] [class*="border-rose-600"] {
+  border-color: #fecdd3 !important;
+}
+
+/* Amber & Yellow - Warnings, Moderate Risk & Disclaimers */
+html.light [class*="text-amber-400"],
+html[data-theme="light"] [class*="text-amber-400"],
+html.light [class*="text-amber-300"],
+html[data-theme="light"] [class*="text-amber-300"],
+html.light [class*="text-amber-200"],
+html[data-theme="light"] [class*="text-amber-200"],
+html.light [class*="text-amber-100"],
+html[data-theme="light"] [class*="text-amber-100"],
+html.light [class*="text-yellow-400"],
+html[data-theme="light"] [class*="text-yellow-400"],
+html.light [class*="text-yellow-300"],
+html[data-theme="light"] [class*="text-yellow-300"] {
+  color: #b45309 !important; /* amber-700 */
+}
+
+html.light [class*="bg-amber-950"],
+html[data-theme="light"] [class*="bg-amber-950"],
+html.light [class*="bg-yellow-950"],
+html[data-theme="light"] [class*="bg-yellow-950"] {
+  background-color: #fffbeb !important;
+  border-color: #fde68a !important;
+}
+
+html.light [class*="bg-amber-500/20"],
+html[data-theme="light"] [class*="bg-amber-500/20"],
+html.light [class*="bg-amber-500/10"],
+html[data-theme="light"] [class*="bg-amber-500/10"] {
+  background-color: #fef3c7 !important;
+  color: #b45309 !important;
+  border-color: #fcd34d !important;
+  font-weight: 600 !important;
+}
+
+html.light [class*="border-amber-800"],
+html[data-theme="light"] [class*="border-amber-800"],
+html.light [class*="border-amber-700"],
+html[data-theme="light"] [class*="border-amber-700"],
+html.light [class*="border-amber-600"],
+html[data-theme="light"] [class*="border-amber-600"] {
+  border-color: #fde68a !important;
+}
+
+/* Indigo & Purple - Level Badges, Chief Fellow Tier & Advanced Scenarios */
+html.light [class*="text-indigo-400"],
+html[data-theme="light"] [class*="text-indigo-400"],
+html.light [class*="text-indigo-300"],
+html[data-theme="light"] [class*="text-indigo-300"],
+html.light [class*="text-indigo-200"],
+html[data-theme="light"] [class*="text-indigo-200"] {
+  color: #4338ca !important; /* indigo-700 */
+}
+
+html.light [class*="text-purple-400"],
+html[data-theme="light"] [class*="text-purple-400"],
+html.light [class*="text-purple-300"],
+html[data-theme="light"] [class*="text-purple-300"],
+html.light [class*="text-purple-200"],
+html[data-theme="light"] [class*="text-purple-200"] {
+  color: #6b21a8 !important; /* purple-700 */
+}
+
+html.light [class*="bg-indigo-950"],
+html[data-theme="light"] [class*="bg-indigo-950"] {
+  background-color: #eef2ff !important;
+  border-color: #c7d2fe !important;
+}
+
+html.light [class*="bg-purple-950"],
+html[data-theme="light"] [class*="bg-purple-950"] {
+  background-color: #faf5ff !important;
+  border-color: #e9d5ff !important;
+}
+
+html.light [class*="bg-indigo-500/20"],
+html[data-theme="light"] [class*="bg-indigo-500/20"] {
+  background-color: #e0e7ff !important;
+  color: #4338ca !important;
+  border-color: #a5b4fc !important;
+  font-weight: 600 !important;
+}
+
+html.light [class*="bg-purple-500/20"],
+html[data-theme="light"] [class*="bg-purple-500/20"] {
+  background-color: #f3e8ff !important;
+  color: #6b21a8 !important;
+  border-color: #d8b4fe !important;
+  font-weight: 600 !important;
+}
+
+/* Blue - Secondary Markers & Below Normal Indications */
+html.light [class*="text-blue-400"],
+html[data-theme="light"] [class*="text-blue-400"],
+html.light [class*="text-blue-300"],
+html[data-theme="light"] [class*="text-blue-300"],
+html.light [class*="text-blue-200"],
+html[data-theme="light"] [class*="text-blue-200"] {
+  color: #1d4ed8 !important; /* blue-700 */
+}
+
+html.light [class*="bg-blue-950"],
+html[data-theme="light"] [class*="bg-blue-950"] {
+  background-color: #eff6ff !important;
+  border-color: #bfdbfe !important;
+}
+
+html.light [class*="bg-blue-500/20"],
+html[data-theme="light"] [class*="bg-blue-500/20"] {
+  background-color: #dbeafe !important;
+  color: #1d4ed8 !important;
+  border-color: #93c5fd !important;
+  font-weight: 600 !important;
+}
+
+/* 3.5 Inputs, Forms & Select Elements in Light Theme */
+html.light input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html.light select,
+html[data-theme="light"] select,
+html.light textarea,
+html[data-theme="light"] textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+  font-weight: 500 !important;
+}
+
+html.light input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+html[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+html.light select:focus,
+html[data-theme="light"] select:focus,
+html.light textarea:focus,
+html[data-theme="light"] textarea:focus {
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
+}
+
+html.light input::placeholder,
+html[data-theme="light"] input::placeholder,
+html.light textarea::placeholder,
+html[data-theme="light"] textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* 3.6 Buttons & Action Controls */
+html.light button.bg-slate-800:not([class*="bg-gradient-"]),
+html[data-theme="light"] button.bg-slate-800:not([class*="bg-gradient-"]),
+html.light a.bg-slate-800:not([class*="bg-gradient-"]),
+html[data-theme="light"] a.bg-slate-800:not([class*="bg-gradient-"]) {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light button.bg-slate-800:hover:not([class*="bg-gradient-"]),
+html[data-theme="light"] button.bg-slate-800:hover:not([class*="bg-gradient-"]),
+html.light a.bg-slate-800:hover:not([class*="bg-gradient-"]),
+html[data-theme="light"] a.bg-slate-800:hover:not([class*="bg-gradient-"]) {
+  background-color: #e2e8f0 !important;
+  color: #020617 !important;
+  border-color: #94a3b8 !important;
+}
+
+/* 3.7 Diagnostic Result Meters & Progress Tracks in Light Mode */
+html.light .h-3.bg-slate-800,
+html[data-theme="light"] .h-3.bg-slate-800,
+html.light .h-2.bg-slate-800,
+html[data-theme="light"] .h-2.bg-slate-800,
+html.light .h-1.5.bg-slate-800,
+html[data-theme="light"] .h-1.5.bg-slate-800,
+html.light .w-full.bg-slate-800.rounded-full,
+html[data-theme="light"] .w-full.bg-slate-800.rounded-full {
+  background-color: #e2e8f0 !important;
+}
+
+/* 3.8 Table Header & Row Styling in Light Mode */
+html.light table th,
+html[data-theme="light"] table th {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-bottom: 2px solid #cbd5e1 !important;
+  font-weight: 700 !important;
+}
+
+html.light table td,
+html[data-theme="light"] table td {
+  border-bottom: 1px solid #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+html.light table tr:hover,
+html[data-theme="light"] table tr:hover {
+  background-color: #f8fafc !important;
+}
+
+/* 3.9 Modals & Overlays */
+html.light .fixed.inset-0.bg-slate-950\/80,
+html[data-theme="light"] .fixed.inset-0.bg-slate-950\/80,
+html.light .fixed.inset-0.bg-slate-950\/70,
+html[data-theme="light"] .fixed.inset-0.bg-slate-950\/70 {
+  background-color: rgba(15, 23, 42, 0.5) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* -------------------------------------------------------------
+ * 4. High-Fidelity Custom Scrollbars
+ * ----------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html.dark ::-webkit-scrollbar-track,
+html[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: #020617;
+}
+
+html.dark ::-webkit-scrollbar-thumb,
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover,
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+html.light ::-webkit-scrollbar-track,
+html[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+html.light ::-webkit-scrollbar-thumb,
+html[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover,
+html[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

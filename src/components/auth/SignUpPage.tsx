@@ -41,12 +41,14 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<RegisterFormData>({
+    username: '',
     fullName: '',
     titlePrefix: 'Dr.',
     email: '',
     password: '',
     confirmPassword: '',
     role: 'Internal Medicine Resident',
+    userType: 'student',
     institution: 'All India Institute of Medical Sciences (AIIMS)',
     department: 'Department of Internal Medicine',
     medicalRegistrationId: 'NMC-2024-' + Math.floor(1000 + Math.random() * 9000),
@@ -54,6 +56,9 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
     bio: 'Medical scholar exploring non-invasive machine learning algorithms and transaminase feature engineering.',
     avatarUrl: PRESET_AVATARS[0].url,
     phone: '+91 98765 43210',
+    country: 'India',
+    state: 'Delhi',
+    areaAddress: 'Ansari Nagar, Ring Road',
     location: 'New Delhi, India',
     agreeToSaMDTerms: true
   });
@@ -292,7 +297,30 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
-              <div className="sm:col-span-3 space-y-1.5">
+              <div className="sm:col-span-4 space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Username (@)</label>
+                <input
+                  type="text"
+                  value={formData.username || ''}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  placeholder="e.g. dr_vamshi_aiims"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 font-mono"
+                />
+              </div>
+
+              <div className="sm:col-span-4 space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Account Type</label>
+                <select
+                  value={formData.userType || 'student'}
+                  onChange={(e) => setFormData({ ...formData, userType: e.target.value as any })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+                >
+                  <option value="student">Medical Student</option>
+                  <option value="faculty">Faculty &amp; Specialist</option>
+                </select>
+              </div>
+
+              <div className="sm:col-span-4 space-y-1.5">
                 <label className="text-xs font-semibold text-slate-300">Title Prefix</label>
                 <select
                   value={formData.titlePrefix}
@@ -307,7 +335,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                 </select>
               </div>
 
-              <div className="sm:col-span-9 space-y-1.5">
+              <div className="sm:col-span-12 space-y-1.5">
                 <label className="text-xs font-semibold text-slate-300">Full Name</label>
                 <input
                   type="text"
@@ -455,15 +483,37 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                 />
               </div>
 
-              <div className="sm:col-span-6 space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300">City &amp; Country</label>
+              <div className="sm:col-span-3 space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Country</label>
+                <input
+                  type="text"
+                  value={formData.country || 'India'}
+                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                  placeholder="e.g. India"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+
+              <div className="sm:col-span-3 space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">State / Province</label>
+                <input
+                  type="text"
+                  value={formData.state || 'Delhi'}
+                  onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                  placeholder="e.g. Delhi, Maharashtra"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+
+              <div className="sm:col-span-12 space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Area Address</label>
                 <div className="relative">
                   <MapPin className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
                   <input
                     type="text"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    placeholder="e.g. New Delhi, India"
+                    value={formData.areaAddress || ''}
+                    onChange={(e) => setFormData({ ...formData, areaAddress: e.target.value, location: `${e.target.value}, ${formData.state}, ${formData.country}` })}
+                    placeholder="e.g. Ansari Nagar East, Ring Road, AIIMS Faculty Complex"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500"
                   />
                 </div>

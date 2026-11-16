@@ -2,13 +2,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { Layers, Eye, EyeOff, RotateCw, ZoomIn, ZoomOut, AlertCircle, Sparkles } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface ThreeLiverViewerProps {
   onSelectAnatomyPart?: (partName: string) => void;
 }
 
 export const ThreeLiverViewer: React.FC<ThreeLiverViewerProps> = ({ onSelectAnatomyPart }) => {
+  const { isDark } = useTheme();
   const mountRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
   const [isZenMode, setIsZenMode] = useState(false);
   const [jaundiceSeverity, setJaundiceSeverity] = useState(0); // 0 (Healthy) to 100 (Severe Icterus)
   const [explodedView, setExplodedView] = useState(0); // 0 to 100%
@@ -28,6 +31,14 @@ export const ThreeLiverViewer: React.FC<ThreeLiverViewerProps> = ({ onSelectAnat
   // Material references for color transition
   const liverMatRef = useRef<THREE.MeshStandardMaterial | null>(null);
   const bileMatRef = useRef<THREE.MeshStandardMaterial | null>(null);
+
+  useEffect(() => {
+    if (sceneRef.current) {
+      const bgColor = isDark ? 0x0f172a : 0xf8fafc;
+      sceneRef.current.background = new THREE.Color(bgColor);
+      sceneRef.current.fog = new THREE.FogExp2(bgColor, 0.035);
+    }
+  }, [isDark]);
 
   useEffect(() => {
     const container = mountRef.current;
@@ -53,8 +64,10 @@ export const ThreeLiverViewer: React.FC<ThreeLiverViewerProps> = ({ onSelectAnat
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0f172a); // Slate 900
-    scene.fog = new THREE.FogExp2(0x0f172a, 0.035);
+    sceneRef.current = scene;
+    const initialBgColor = isDark ? 0x0f172a : 0xf8fafc;
+    scene.background = new THREE.Color(initialBgColor);
+    scene.fog = new THREE.FogExp2(initialBgColor, 0.035);
 
     // Camera
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);

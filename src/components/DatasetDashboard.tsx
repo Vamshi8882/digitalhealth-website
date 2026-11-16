@@ -3,8 +3,18 @@ import { ILPD_DATASET, ILPDRecord } from '../data/ilpdData';
 import { PRETRAINED_MODELS_METRICS } from '../ml/engine';
 import { Database, BarChart2, Table, Terminal, Play, CheckCircle2, ChevronRight, Award } from 'lucide-react';
 
-export const DatasetDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'demographics' | 'models' | 'sql'>('demographics');
+interface DatasetDashboardProps {
+  initialTab?: 'demographics' | 'models' | 'sql';
+}
+
+export const DatasetDashboard: React.FC<DatasetDashboardProps> = ({ initialTab }) => {
+  const [activeTab, setActiveTab] = useState<'demographics' | 'models' | 'sql'>(initialTab || 'demographics');
+
+  React.useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
   const [sqlQuery, setSqlQuery] = useState<string>(
     'SELECT Gender, COUNT(*) AS Total, AVG(Total_Bilirubin) AS Avg_TBIL, AVG(De_Ritis_Ratio) AS Avg_EnzymeRatio FROM lab_records GROUP BY Gender;'
   );
